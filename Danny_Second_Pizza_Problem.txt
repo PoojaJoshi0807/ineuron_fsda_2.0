@@ -1,0 +1,265 @@
+create database Pooja;
+use Pooja;
+drop table Data;
+create table Data
+( 
+  Empolyee_name Varchar(30),
+  DOJ Varchar(30),
+  Project_name Varchar(30)
+  );
+select * from Data;
+insert into Data values
+('Pooja', '22-Nov', 'AFF')
+use Pooja;
+create table Runners
+( 
+  Runner_id int,
+  Registration_date date
+);
+insert into Runners (Runner_id, Registration_date)
+Values
+  (1, '2021-01-01'),
+  (2, '2021-01-03'),
+  (3, '2021-01-08'),
+  (4, '2021-01-15');
+Select * from Runners;
+drop table Customers_orders;
+Create table Customers_orders
+(
+  Order_id Int,
+  Customer_id int,
+  Pizza_id int,
+  Exclusions Varchar(10),
+  Extras Varchar(10),
+  Order_time timestamp
+);
+INSERT INTO Customers_orders
+VALUES
+  ('1', '101', '1', '', '', '2020-01-01 18:05:02'),
+  ('2', '101', '1', '', '', '2020-01-01 19:00:52'),
+  ('3', '102', '1', '', '', '2020-01-02 23:51:23'),
+  ('3', '102', '2', '', NULL, '2020-01-02 23:51:23'),
+  ('4', '103', '1', '4', '', '2020-01-04 13:23:46'),
+  ('4', '103', '1', '4', '', '2020-01-04 13:23:46'),
+  ('4', '103', '2', '4', '', '2020-01-04 13:23:46'),
+  ('5', '104', '1', 'null', '1', '2020-01-08 21:00:29'),
+  ('6', '101', '2', 'null', 'null', '2020-01-08 21:03:13'),
+  ('7', '105', '2', 'null', '1', '2020-01-08 21:20:29'),
+  ('8', '102', '1', 'null', 'null', '2020-01-09 23:54:33'),
+  ('9', '103', '1', '4', '1, 5', '2020-01-10 11:22:59'),
+  ('10', '104', '1', 'null', 'null', '2020-01-11 18:34:49'),
+  ('10', '104', '1', '2, 6', '1, 4', '2020-01-11 18:34:49');
+select * from Customers_orders;
+Create table Runner_orders
+(Order_id Int,
+Runner_id Int,
+Pickup_time Timestamp,
+Distance Varchar(10),
+Duration Varchar(10),
+Cancellation Varchar(30)
+);
+INSERT INTO runner_orders
+VALUES
+  ('1', '1', '2020-01-01 18:15:34', '20 KM', '32 mins', ''),
+  ('2', '1', '2020-01-01 19:10:54', '20 KM', '27 mins', ''),
+  ('3', '1', '2020-01-03 00:12:37', '13.4 KM', '20 mins', NULL),
+  ('4', '2', '2020-01-04 13:53:03', '23.4 KM', '40 mins', NULL),
+  ('5', '3', '2020-01-08 21:10:57', '10 KM' , '15 mins', NULL),
+  ('6', '3', NULL, NULL, NULL, 'Restaurant Cancellation'),
+  ('7', '2', '2020-01-08 21:30:45', '25 KM', '25 mins', 'null'),
+  ('8', '2', '2020-01-10 00:15:02', '23.4 km', '15 mins', 'null'),
+  ('9', '2', NULL, NULL, NULL, 'Customer Cancellation'),
+  ('10', '1', '2020-01-11 18:50:20', '10 KM', '10 mins', NULL);
+create table Pizza_names
+( Pizza_id Int,
+  Pizza_Name Varchar(30)
+);
+insert into Pizza_names Values
+('1', 'Meat Lovers'),
+('2', 'Vegaterian');
+Select * from Pizza_names;
+drop table Pizza_recipes;
+Create table Pizza_recipes
+(Pizza_id Int,
+ Toppings Int);
+insert into Pizza_recipes Values
+('1', '1'),
+('1', '2'),
+('1', '3'),
+('1', '4'),
+('1', '5'),
+('1', '6'),
+('1', '8'),
+('1', '10'),
+('2', '4'),
+('2', '6'),
+('2', '7'),
+('2', '9'),
+('2', '11'),
+('2', '12');
+drop table Pizza_toppings;
+create table Pizza_toppings
+(Topping_id Int,
+ Topping_name Varchar(20)
+);
+INSERT INTO pizza_toppings
+VALUES
+  (1, 'Bacon'),
+  (2, 'BBQ Sauce'),
+  (3, 'Beef'),
+  (4, 'Cheese'),
+  (5, 'Chicken'),
+  (6, 'Mushrooms'),
+  (7, 'Onions'),
+  (8, 'Pepperoni'),
+  (9, 'Peppers'),
+  (10, 'Salami'),
+  (11, 'Tomatoes'),
+  (12, 'Tomato Sauce');
+select * from Pizza_toppings;
+Drop table Master_Pizza;
+create table Master_Pizza 
+(select distinct (CO.Customer_id), RO.order_id, RO.runner_id, CO.Pizza_id, PN.Pizza_name, PT.Topping_id, PT. Topping_name, 
+R.Registration_date, CO.Order_time, RO.Pickup_time, RO.Distance, RO.Duration, RO.Cancellation, 
+CO.Exclusions, CO.Extras from runner_orders as RO 
+left outer join Runners as R on RO.Runner_id=R.Runner_id
+left outer join customers_orders as CO on RO.order_id=CO.Order_id
+left outer join Pizza_names as PN on CO.Pizza_id=PN.Pizza_id
+left outer join Pizza_recipes as PR on CO.Pizza_id=PR.Pizza_id
+left outer join Pizza_toppings as PT on PR.toppings=PT.topping_id
+Order by 1,2,3,4,6);
+select * from Master_Pizza;
+-- 1.How many pizzas were ordered?
+Select count(order_id) as total_pizza_ordered from Customers_orders;
+-- 2.How many unique customer orders were made?
+select count(distinct order_id) as Unique_Customer_order from Customers_orders;
+-- 3.How many successful orders were delivered by each runner?
+select Runner_id, Count(order_id) as Successful_order from Runner_orders 
+where Distance >= 0
+Group by Runner_id;
+-- 4.How many of each type of pizza was delivered?
+Select distinct Pizza_name, Count(Order_id) as Total_Delivered_pizza from Master_Pizza
+Where Distance>=0
+Group by Pizza_name;
+-- 5.How many Vegetarian and Meatlovers were ordered by each customer?
+Select Customer_id, Pizza_name, Count(Pizza_name) as Total_Ordered_pizza from Master_Pizza
+Group by Pizza_name, Customer_id
+order by Customer_id;
+-- 6.What was the maximum number of pizzas delivered in a single order?
+select Max(A.Pizza_Per_Order) as Pizza_count from (select order_id, Count(Pizza_id) as Pizza_Per_Order from Master_Pizza
+Group by Order_id) as A;
+Select * from Master_Pizza;
+SET SQL_SAFE_UPDATES = 0;
+Update Master_Pizza
+Set Exclusions = 'Null' where Exclusions = 'N';
+Update Master_Pizza
+Set Extras = null where Extras = 'N';
+-- 7.For each customer, how many delivered pizzas had at least 1 change and how many had no changes?
+select Customer_id, 
+Sum(Case when Exclusions >= 'null' or Extra >= 'null'then 0
+	 Else 1
+     End) as at_least_1_change,
+Sum(Case when Exclusions = 'null' and Extra = 'null' then 1
+	 Else 0
+     End) as No_Change
+From Temp_Master_Pizza where Distances>=0
+Group by Customer_id
+Order by Customer_id;
+-- 8.How many pizzas were delivered that had both exclusions and extras?
+select Pizza_id,
+Sum(case when Exclusions>= NULL then 1
+		 when Extra>= Null then 1 
+         else 0
+    end) as Total_delivered_pizza_With_both_Exulsions_Extras
+From Temp_Master_Pizza where distances>=0
+Group by Pizza_id;
+Drop table if exists Temp_Master_pizza;
+Create Table Temp_Master_pizza
+as select *,
+Case when Distance= 'null' then null 
+	 Else Distance end as Distances, 
+Case When Cancellation = '' then null
+	 Else Cancellation end as Cancellations,
+Case when Extras= 'null' then null 
+     else Extras end as Extra
+From Master_pizza;
+select * from Temp_Master_Pizza;
+Alter table Temp_Master_Pizza
+Drop Column Distance,
+Drop Column Cancellation,
+Drop Column Extras;
+-- Q9. What was the total volume of pizzas ordered for each hour of the day?
+select Extract(hour from Order_time) as Hour_of_Day, Count(Pizza_id) as Total_volume_Pizza 
+from Temp_Master_Pizza
+Group by Hour_of_Day
+order by Hour_of_Day;
+-- 10.What was the volume of orders for each day of the week?
+select Dayname(order_time) as DAY_OF_THE_WEEK, Count(Pizza_id) as Total_volume_Pizza 
+from Temp_Master_Pizza
+Group by DAY_OF_THE_WEEK
+order by DAY_OF_THE_WEEK;
+-- B. Runner and Customer Experience
+-- Q1. How many runners signed up for each 1 week period? (i.e. week starts 2021-01-01)
+Select distinct Registration_date, Extract(week from Registration_date	+ 3) as Week_OF_YEAR from Temp_Master_Pizza
+order by Registration_date;
+-- Q2. What was the average time in minutes it took for each runner to arrive at the Pizza Runner HQ to pick up the order?
+select Runner_id, Avg(Minute(timediff(Pickup_time,Order_time))) as Avg_Time from Temp_Master_Pizza
+Group by Runner_id
+Order by Runner_id;
+-- Q3. Is there any relationship between the number of pizzas and how long the order takes to prepare?
+select distinct Order_id, count(Pizza_id) as Total_No_of_Pizza, Avg(Minute(timediff(Pickup_time,Order_time))) as Time_to_Prepare from Temp_Master_Pizza
+where Cancellations is Null
+Group by Order_id
+Order by Total_No_of_Pizza desc;
+-- Q4. What was the average distance traveled for each customer?
+select Customer_id, Round(Avg(Distances)) as Avg_Distance_Travelled from Temp_Master_Pizza where Distances>=0
+Group by Customer_id;
+-- Q5. What was the difference between the longest and shortest delivery times for all orders?
+Select Max(Duration) as Longest_Delivery, Min(Duration) as Shortest_Delivery, Max(Duration) - Min(Duration) as Duration from Temp_Master_Pizza;
+-- Q6. What was the average speed for each runner for each delivery and do you notice any trend for these values?
+Select Runner_id, Round(Avg(Distances/(Duration/60))) as Speed from Temp_Master_Pizza where Distances>=0
+Group by Runner_id
+Order by Speed Desc;
+select * from Temp_Master_Pizza;
+-- Q7. What is the successful delivery percentage for each runner?
+Select Runner_id, Round(count(distances)/ count(runner_id) * 100) as Delivery_Percent from Temp_Master_Pizza
+Group by Runner_id;
+Select * from Temp_Master_Pizza;
+-- C. Ingredient Optimisation
+-- Q1. What are the standard ingredients for each pizza?
+select Distinct Pizza_name as Pizza, Topping_name as Standard_Ingredients from Master_pizza;
+-- Q2. What was the most commonly added extra?
+Select A.Extras, Max(A.No_of_Occurence) as Most_commonly_added_Extra 
+from (select Extras, Count(Extras) as No_of_Occurence from Temp_Master_Pizza 
+where length(Extras)>=1 and Extras!='null'
+group by Extras
+order by Extras) A
+group by A.Extras
+Limit 1;
+-- Q3. What was the most common exclusion?
+Select A.Exclusions, Max(A.No_of_Occurence) as Most_commonly_added_Exclusions 
+from (select Exclusions, Count(Exclusions) as No_of_Occurence from Temp_Master_Pizza 
+where length(Exclusions)>=1 and Exclusions!='null'
+group by Exclusions
+order by Exclusions) A
+group by A.Exclusions
+Limit 1;
+-- Q4. Generate an order item for each record in the customers_orders table in the format of one of the following:
+-- Meat Lovers
+-- Meat Lovers - Exclude Beef
+-- Meat Lovers - Extra Bacon
+-- Meat Lovers - Exclude Cheese, Bacon - Extra Mushroom, Peppers
+select distinct order_id, Pizza_id, Pizza_name, Exclusions, Extras,
+Case 
+    when Pizza_id = 1 and (Exclusions = 'null' or Exclusions = '') and (Extras = 'null' or Extras = '') then 'Meat Lovers'
+    when Pizza_id = 1 and (Exclusions = 4) and (Extras = 'null' or Extras = '') then 'Meat Lovers exclude Cheese'
+    when Pizza_id = 1 and (Exclusions = 4) and (Extras in (1, 5)) then 'Meat Lovers exclude Cheese but extras Bacon and Chicken'
+    when Pizza_id = 1 and (Exclusions in (2,6)) and (Extras in (1, 4)) then 'Meat Lovers exclude BBQ Sauce and Mushrooms but extras Bacon and Cheese'
+    when Pizza_id = 1 and (Exclusions = 'null' or Exclusions = '') and (Extras = 1) then 'Meat Lovers extras Bacon'
+    when Pizza_id = 2 and (Exclusions = 'null' or Exclusions = '') and (Extras = 'null' or Extras = '') then 'Vegaterian'
+	when Pizza_id = 2 and (Exclusions = 4) and (Extras = 'null' or Extras = '') then 'Vegaterian exclude Cheese'
+    when Pizza_id = 2 and (Exclusions = 'null' or Exclusions = '') and (Extras = 1) then 'Vegaterian extras Bacon'
+    when Pizza_id = 2 and (Exclusions = 'null' or Exclusions = '') and (Extras = 1) then 'Vegaterian extras Bacon'
+end as Order_Items
+from temp_master_pizza
+order by order_id;
